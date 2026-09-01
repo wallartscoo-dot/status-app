@@ -1,0 +1,59 @@
+# Brings up Postgres + the API together. For local development you likely
+# still want `npm run dev` (hot reload) with Postgres running via this file
+# alone — see the "hybrid" note below. For a full containerized run
+# (closer to production), use both services as-is.
+#
+# Usage:
+#   docker compose up -d db            # just Postgres, for local `npm run dev`
+#   docker compose up -d                # everything, containerized
+#   docker compose exec api npm run migrate
+#   docker compose exec api npm run seed
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: statusapp
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  api:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "4000:4000"
+    environment:
+      NODE_ENV: production
+      PORT: 4000
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/statusapp
+      # Replace both secrets before any real deployment — these are
+      # placeholders only. Generate with:
+      #   node -e "console.log(require('crypto').randomBytes(48).toString('hex'))"
+      JWT_ACCESS_SECRET: change_me_access_secret_min_16_chars
+      JWT_REFRESH_SECRET: change_me_refresh_secret_min_16_chars
+      CORS_ORIGIN: "*"
+      UPLOAD_DIR: uploads
+      PUBLIC_MEDIA_BASE_URL: ""
+    volumes:
+      # Uploaded media persists across container restarts/redeploys. For
+      # multi-instance deployments, swap the local-disk storage adapter
+      # (src/config/storage.ts) for S3/Cloudinary instead of relying on a
+      # single host's volume.
+      - uploads_data:/app/uploads
+
+volumes:
+  db_data:
+  uploads_data:

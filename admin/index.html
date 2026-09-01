@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Status App — Admin</title>
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ============ Login screen ============ -->
+  <div id="login-screen" class="login-screen">
+    <div class="login-card">
+      <div class="brand">
+        <span class="brand-dot"></span>
+        <span class="brand-name">Status App</span>
+      </div>
+      <h1>Admin Dashboard</h1>
+      <p class="muted">Sign in with an admin account.</p>
+
+      <form id="login-form">
+        <label>Email or username</label>
+        <input id="login-identifier" type="text" placeholder="admin" autocomplete="username" required />
+
+        <label>Password</label>
+        <input id="login-password" type="password" placeholder="••••••••" autocomplete="current-password" required />
+
+        <label>API URL</label>
+        <input id="login-api-url" type="text" placeholder="http://localhost:4000" />
+
+        <button type="submit" id="login-submit">Sign In</button>
+        <p id="login-error" class="error-text"></p>
+      </form>
+
+      <p class="hint">Demo admin (from <code>npm run seed</code>): <code>admin / ChangeMe123!</code></p>
+    </div>
+  </div>
+
+  <!-- ============ Dashboard shell ============ -->
+  <div id="dashboard" class="dashboard hidden">
+    <aside class="sidebar">
+      <div class="brand">
+        <span class="brand-dot"></span>
+        <span class="brand-name">Status App</span>
+      </div>
+      <nav>
+        <button class="nav-item active" data-tab="overview">📊 Overview</button>
+        <button class="nav-item" data-tab="users">👥 Users</button>
+        <button class="nav-item" data-tab="content">🎬 Content</button>
+        <button class="nav-item" data-tab="reports">🚩 Reports</button>
+        <button class="nav-item" data-tab="categories">🏷️ Categories</button>
+      </nav>
+      <div class="sidebar-footer">
+        <div id="admin-whoami" class="whoami"></div>
+        <button id="logout-btn" class="ghost-btn">Log out</button>
+      </div>
+    </aside>
+
+    <main class="content">
+      <!-- Overview -->
+      <section id="tab-overview" class="tab-panel active">
+        <h2>Overview</h2>
+        <div id="stat-cards" class="stat-cards"></div>
+        <h3>Trending Content</h3>
+        <table class="data-table" id="trending-table">
+          <thead><tr><th>Title</th><th>Creator</th><th>Downloads</th><th>Views</th></tr></thead>
+          <tbody></tbody>
+        </table>
+
+        <h3>Activity (last 7 days)</h3>
+        <table class="data-table" id="events-table">
+          <thead><tr><th>Event</th><th>Count</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </section>
+
+      <!-- Users -->
+      <section id="tab-users" class="tab-panel">
+        <h2>Users</h2>
+        <div class="toolbar">
+          <input id="users-search" type="text" placeholder="Search by username, email, or name…" />
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>User</th><th>Email</th><th>Role</th><th>Uploads</th><th>Downloads</th>
+              <th>Followers</th><th>Joined</th><th>Status</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="users-tbody"></tbody>
+        </table>
+        <div class="pagination" id="users-pagination"></div>
+      </section>
+
+      <!-- Content -->
+      <section id="tab-content" class="tab-panel">
+        <h2>Content</h2>
+        <div class="toolbar">
+          <select id="content-visibility-filter">
+            <option value="">All visibility</option>
+            <option value="PUBLISHED">Published</option>
+            <option value="PENDING">Pending</option>
+            <option value="REJECTED">Rejected</option>
+            <option value="REMOVED">Removed</option>
+          </select>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Title</th><th>Type</th><th>Category</th><th>Creator</th>
+              <th>Visibility</th><th>Featured</th><th>Downloads</th><th>Views</th><th></th>
+            </tr>
+          </thead>
+          <tbody id="content-tbody"></tbody>
+        </table>
+        <div class="pagination" id="content-pagination"></div>
+      </section>
+
+      <!-- Reports -->
+      <section id="tab-reports" class="tab-panel">
+        <h2>Reports</h2>
+        <div class="toolbar">
+          <select id="reports-state-filter">
+            <option value="OPEN">Open</option>
+            <option value="REVIEWED">Reviewed</option>
+            <option value="DISMISSED">Dismissed</option>
+            <option value="">All</option>
+          </select>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr><th>Status</th><th>Reason</th><th>Details</th><th>Reporter</th><th>State</th><th>Reported</th><th></th></tr>
+          </thead>
+          <tbody id="reports-tbody"></tbody>
+        </table>
+        <div class="pagination" id="reports-pagination"></div>
+      </section>
+
+      <!-- Categories -->
+      <section id="tab-categories" class="tab-panel">
+        <h2>Categories</h2>
+        <form id="category-form" class="inline-form">
+          <input id="category-key" placeholder="key (e.g. gaming)" required />
+          <input id="category-label" placeholder="Label (e.g. Gaming)" required />
+          <input id="category-emoji" placeholder="Emoji" maxlength="4" style="width:70px" />
+          <input id="category-sort" type="number" placeholder="Sort" style="width:80px" value="0" />
+          <button type="submit">Add Category</button>
+        </form>
+        <table class="data-table">
+          <thead><tr><th></th><th>Label</th><th>Key</th><th>Sort</th><th>Statuses</th><th></th></tr></thead>
+          <tbody id="categories-tbody"></tbody>
+        </table>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast hidden"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>

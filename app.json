@@ -1,0 +1,59 @@
+{
+  "expo": {
+    "name": "Status App",
+    "slug": "status-app",
+    "scheme": "statusapp",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0B0B14"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.statusapp.app",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Status App needs access to your photo library so you can upload videos/images and save downloaded statuses.",
+        "NSPhotoLibraryAddUsageDescription": "Status App saves downloaded statuses to your photo library.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0B0B14"
+      },
+      "package": "com.statusapp.app",
+      "versionCode": 1,
+      "permissions": ["READ_EXTERNAL_STORAGE", "WRITE_EXTERNAL_STORAGE"]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Status App needs access to your photos so you can upload a status."
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Status App saves downloaded statuses to your photo library.",
+          "savePhotosPermission": "Status App saves downloaded statuses to your photo library."
+        }
+      ]
+    ],
+    "extra": {
+      "apiUrl": "http://localhost:4000"
+    },
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
