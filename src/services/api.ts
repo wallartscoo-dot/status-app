@@ -79,10 +79,15 @@ async function request<T>(path: string, options: RequestOptions = {}, retried = 
 
   let response: Response;
   try {
+    // DEBUG (temporary): logs the exact URL every request targets, so a
+    // misconfigured EXPO_PUBLIC_API_URL / app.json extra.apiUrl shows up
+    // immediately instead of a generic "can't reach the server" message.
+    // Safe to remove once API_URL is confirmed correct in production.
+    console.log("[api] requesting:", `${API_URL}${path}`);
     response = await fetch(`${API_URL}${path}`, { ...options, headers });
   } catch (e) {
     throw new ApiError(
-      "Can't reach the server. Check your connection or API URL.",
+      `Can't reach the server (tried: "${API_URL}"). Check your connection or API URL.`,
       0,
       "NETWORK_ERROR"
     );
@@ -311,12 +316,17 @@ export const api = {
 
       let response: Response;
       try {
+        console.log("[api] uploading to:", `${API_URL}/api/statuses/upload`);
         // Deliberately not going through request(): fetch must set its own
         // multipart boundary from the FormData, so we must NOT set
         // Content-Type manually (request() always adds application/json).
         response = await fetch(`${API_URL}/api/statuses/upload`, { method: "POST", headers, body: form });
       } catch {
-        throw new ApiError("Can't reach the server. Check your connection or API URL.", 0, "NETWORK_ERROR");
+        throw new ApiError(
+          `Can't reach the server (tried: "${API_URL}"). Check your connection or API URL.`,
+          0,
+          "NETWORK_ERROR"
+        );
       }
 
       if (!response.ok) {
