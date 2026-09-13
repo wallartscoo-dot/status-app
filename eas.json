@@ -27,7 +27,7 @@
       },
       "channel": "preview",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://staging-api.statusapp.example.com"
+        "EXPO_PUBLIC_API_URL": "https://status-app-j3i4.onrender.com"
       }
     },
     "production": {
@@ -37,7 +37,7 @@
       },
       "channel": "production",
       "env": {
-        "EXPO_PUBLIC_API_URL": "https://api.statusapp.example.com"
+        "EXPO_PUBLIC_API_URL": "https://status-app-j3i4.onrender.com"
       }
     }
   },
