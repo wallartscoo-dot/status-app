@@ -1,13 +1,9 @@
-import Constants from "expo-constants";
 import * as SecureStore from "expo-secure-store";
 
-// Base URL comes from app.json -> expo.extra.apiUrl, overridable with
-// EXPO_PUBLIC_API_URL (handy for device testing against your LAN IP, e.g.
-// EXPO_PUBLIC_API_URL=http://192.168.1.23:4000 npx expo start).
-const API_URL =
-  process.env.EXPO_PUBLIC_API_URL ??
-  (Constants.expoConfig?.extra?.apiUrl as string | undefined) ??
-  "http://localhost:4000";
+// Hardcoded directly — no more dependency on EXPO_PUBLIC_API_URL or
+// app.json's extra.apiUrl working correctly at build/runtime. This removes
+// every possible point of failure in that chain.
+const API_URL = "https://status-app-j3i4.onrender.com";
 
 const ACCESS_TOKEN_KEY = "30sec_access_token";
 const REFRESH_TOKEN_KEY = "30sec_refresh_token";
