@@ -27,12 +27,12 @@
       },
       "channel": "preview",
       "env": {
-<<<<<<< HEAD
+
         "EXPO_PUBLIC_API_URL": "https://status-app-j3i4.onrender.com"
       }
-=======
+
         "EXPO_PUBLIC_API_URL": "https://status-app-j3i4.onrender.com"      }
->>>>>>> 23a2701 (Add backend)
+ 23a2701 (Add backend)
     },
     "production": {
       "autoIncrement": true,
