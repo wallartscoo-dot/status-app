@@ -59,9 +59,9 @@
       ]
     ],
     "extra": {
-<<<<<<< HEAD
+
       "apiUrl": "https://status-app-j3i4.onrender.com"
-=======
+
       "apiUrl": "http://localhost:4000",
       "router": {
         "origin": false
@@ -69,7 +69,7 @@
       "eas": {
         "projectId": "ca71abf5-19ec-4dce-af6c-d82ac6d03696"
       }
->>>>>>> 23a2701 (Add backend)
+
     },
     "experiments": {
       "typedRoutes": true
