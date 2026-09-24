@@ -62,7 +62,6 @@
 
       "apiUrl": "https://status-app-j3i4.onrender.com"
 
-      "apiUrl": "http://localhost:4000",
       "router": {
         "origin": false
       },
