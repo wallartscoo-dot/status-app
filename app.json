@@ -59,9 +59,7 @@
       ]
     ],
     "extra": {
-
-      "apiUrl": "https://status-app-j3i4.onrender.com"
-
+     "apiUrl": "https://status-app-j3i4.onrender.com",
       "router": {
         "origin": false
       },
