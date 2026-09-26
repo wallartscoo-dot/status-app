@@ -4,7 +4,7 @@ import * as SecureStore from "expo-secure-store";
 // Base URL comes from app.json -> expo.extra.apiUrl, overridable with
 // EXPO_PUBLIC_API_URL (handy for device testing against your LAN IP, e.g.
 // EXPO_PUBLIC_API_URL=http://192.168.1.23:4000 npx expo start).
-const API_URL ="https://status-app-j3i4.onrender.com"
+const API_URL ="https://status-app-j3i4.onrender.com";
   process.env.EXPO_PUBLIC_API_URL ??
   (Constants.expoConfig?.extra?.apiUrl as string | undefined) ??
   "http://localhost:4000";
