@@ -34,4 +34,21 @@ export const shadow = {
     shadowRadius: 16,
     elevation: 6,
   },
+  // Softer, more diffuse shadow used under glass surfaces — glass reads as
+  // "floating" rather than "printed", so the shadow is lower-opacity and
+  // wider-spread than the old flat `card` shadow.
+  glass: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.14,
+    shadowRadius: 24,
+    elevation: 8,
+  },
+  glassFloating: {
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 16 },
+    shadowOpacity: 0.22,
+    shadowRadius: 32,
+    elevation: 12,
+  },
 };
