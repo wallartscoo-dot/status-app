@@ -1,4 +1,5 @@
 import { pool } from "../config/db";
+import { env } from "../config/env";
 import { ApiError } from "../utils/ApiError";
 import type {
   IslamicSubcategory,
@@ -315,4 +316,51 @@ export async function listSurahs() {
       revelationPlace: r.revelation_place,
     })),
   };
+}
+export async function listSoundstripePlaylists(params?: {
+  page?: number;
+  limit?: number;
+}) {
+  const apiKey = env.SOUNDSTRIPE_API_KEY;
+  const baseUrl =
+    env.SOUNDSTRIPE_API_BASE_URL || "https://api.soundstripe.com";
+
+  if (!apiKey) {
+  throw new ApiError(
+    500,
+    "SOUNDSTRIPE_API_KEY_MISSING",
+    "Soundstripe API key is not configured"
+  );
+}
+  const url = new URL("/v1/playlists", baseUrl);
+
+  url.searchParams.set(
+    "page[number]",
+    String(params?.page ?? 1)
+  );
+  url.searchParams.set(
+    "page[size]",
+    String(params?.limit ?? 10)
+  );
+  url.searchParams.set(
+    "include",
+    "songs,songs.artists,songs.audio_files"
+  );
+
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      Authorization: `Token ${apiKey}`,
+      Accept: "application/vnd.api+json",
+    },
+  });
+
+  if (!response.ok) {
+  throw new ApiError(
+    502,
+    "SOUNDSTRIPE_API_REQUEST_FAILED",
+    `Soundstripe API request failed (${response.status})`
+  );
+}
+  return response.json();
 }
