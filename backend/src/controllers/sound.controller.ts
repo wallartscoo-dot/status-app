@@ -74,3 +74,20 @@ export const listFavorites = asyncHandler(async (req: Request, res: Response) =>
   const result = await soundFavoriteService.listSoundFavorites(req.user!.sub, { page, limit });
   res.json(result);
 });
+
+export const soundstripePlaylists = asyncHandler(
+  async (req: Request, res: Response) => {
+    const page = Math.max(1, Number(req.query.page) || 1);
+    const limit = Math.min(
+      50,
+      Math.max(1, Number(req.query.limit) || 10)
+    );
+
+    const result = await soundService.listSoundstripePlaylists({
+      page,
+      limit,
+    });
+
+    res.json(result);
+  }
+);
