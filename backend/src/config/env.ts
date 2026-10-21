@@ -22,6 +22,10 @@ const envSchema = z.object({
   PUBLIC_MEDIA_BASE_URL: z.string().default(""), // derived from PORT if empty, see storage.ts
   MAX_VIDEO_MB: z.coerce.number().default(30),
   MAX_IMAGE_MB: z.coerce.number().default(10),
+  
+ // --- Soundstripe API ---
+SOUNDSTRIPE_API_KEY: z.string().optional(),
+SOUNDSTRIPE_API_BASE_URL: z.string().url().optional(),
 });
 
 const parsed = envSchema.safeParse(process.env);
