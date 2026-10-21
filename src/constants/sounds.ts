@@ -1,13 +1,20 @@
 import type { IslamicSubcategory } from "@/services/api";
 
-export type LibraryTabKey = "ALL" | "MUSIC" | "TRENDING" | "ISLAMIC" | "FAVORITES";
+export type LibraryTabKey =
+  | "ALL"
+  | "MUSIC"
+  | "TRENDING"
+  | "ISLAMIC"
+  | "FAVORITES"
+  | "SOUNDSTRIPE";
 
 export const LIBRARY_TABS: { key: LibraryTabKey; label: string }[] = [
   { key: "ALL", label: "All" },
   { key: "MUSIC", label: "Music" },
   { key: "TRENDING", label: "Trending" },
   { key: "ISLAMIC", label: "Islamic" },
-  { key: "FAVORITES", label: "Favorites" },
+   { key: "FAVORITES", label: "Favorites" },
+  { key: "SOUNDSTRIPE", label: "Soundstripe" },
 ];
 
 // Fallback list used before /api/sounds/meta resolves (and offline). Kept in
