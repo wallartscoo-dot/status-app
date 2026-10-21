@@ -18,6 +18,11 @@ router.get("/search", optionalAuth, validate(searchSoundsQuerySchema, "query"), 
 router.get("/meta", soundController.meta);
 router.get("/quran/surahs", soundController.surahs);
 
+router.get(
+  "/soundstripe/playlists",
+  soundController.soundstripePlaylists
+);
+
 // --- Favorites ("Favorites" tab of the library) ---
 router.get("/favorites/mine", requireAuth, validate(paginationSchema, "query"), soundController.listFavorites);
 
