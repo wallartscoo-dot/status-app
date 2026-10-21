@@ -327,6 +327,21 @@ export interface ApiSoundMeta {
   islamicSubcategories: { key: IslamicSubcategory; label: string; emoji: string }[];
 }
 
+export interface SoundstripeResource {
+  id: string;
+  type: string;
+  attributes: Record<string, unknown>;
+  relationships?: Record<string, unknown>;
+}
+
+export interface SoundstripePlaylistsResponse {
+  data: SoundstripeResource[];
+  included?: SoundstripeResource[];
+  meta?: Record<string, unknown>;
+  links?: Record<string, unknown>;
+}
+
+
 interface ListSoundsFilters {
   page?: number;
   limit?: number;
@@ -489,7 +504,18 @@ export const api = {
     favorite: (id: string) =>
       request<{ alreadyFavorited: boolean }>(`/api/sounds/${id}/favorite`, { method: "POST", auth: true }),
     unfavorite: (id: string) => request<void>(`/api/sounds/${id}/favorite`, { method: "DELETE", auth: true }),
-    listFavorites: (page = 1) => request<ApiPaginated<ApiSound>>(`/api/sounds/favorites/mine?page=${page}`, { auth: true }),
+    
+    listFavorites: (page = 1) =>
+      request<ApiPaginated<ApiSound>>(
+        `/api/sounds/favorites/mine?page=${page}`,
+        { auth: true }
+      ),
+
+    soundstripePlaylists: (page = 1, limit = 10) =>
+      request<SoundstripePlaylistsResponse>(
+        `/api/sounds/soundstripe/playlists?page=${page}&limit=${limit}`,
+        { auth: true }
+      ),
   },
   downloads: {
     list: (page = 1) => request<ApiPaginated<ApiDownload>>(`/api/downloads?page=${page}`, { auth: true }),
