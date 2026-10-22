@@ -111,45 +111,58 @@ const [soundstripeError, setSoundstripeError] = useState<string | null>(null);
     [tab, islamicSub, debouncedQuery, user]
   );
 
-  useEffect(() => {
+    useEffect(() => {
     load(1, true);
   }, [load]);
 
   useEffect(() => {
-  if (tab !== "SOUNDSTRIPE") return;
+    if (tab !== "SOUNDSTRIPE") return;
 
-  let cancelled = false;
+    let cancelled = false;
 
-  const fetchPlaylists = async () => {
-    setSoundstripeLoading(true);
-    setSoundstripeError(null);
+    const fetchPlaylists = async () => {
+      setSoundstripeLoading(true);
+      setSoundstripeError(null);
 
-    try {
-      const response = await api.sounds.soundstripePlaylists(1, 20);
-      if (!cancelled) {
-        setSoundstripePlaylists(response.data);
-      }
-    } catch (error) {
-      if (!cancelled) {
-        setSoundstripeError(
-          error instanceof Error
-            ? error.message
-            : "Couldn't load Soundstripe playlists."
+      try {
+        const response = await api.sounds.soundstripePlaylists(1, 20);
+
+        console.log(
+          "Soundstripe playlist sample:",
+          JSON.stringify(
+            {
+              playlist: response.data?.[0],
+              included: response.included?.slice(0, 5),
+            },
+            null,
+            2
+          )
         );
-      }
-    } finally {
-      if (!cancelled) {
-        setSoundstripeLoading(false);
-      }
-    }
-  };
 
-  fetchPlaylists();
+        if (!cancelled) {
+          setSoundstripePlaylists(response.data);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setSoundstripeError(
+            error instanceof Error
+              ? error.message
+              : "Couldn't load Soundstripe playlists."
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setSoundstripeLoading(false);
+        }
+      }
+    };
 
-  return () => {
-    cancelled = true;
-  };
-}, [tab]);
+    fetchPlaylists();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [tab]);
   
   // Trending rail shown above the list on the "All" tab.
   useEffect(() => {
