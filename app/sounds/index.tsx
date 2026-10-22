@@ -125,8 +125,7 @@ const [soundstripeError, setSoundstripeError] = useState<string | null>(null);
     setSoundstripeError(null);
 
     try {
-      const response = await api.soundstripePlaylists(1, 20);
-
+      const response = await api.sounds.soundstripePlaylists(1, 20);
       if (!cancelled) {
         setSoundstripePlaylists(response.data);
       }
