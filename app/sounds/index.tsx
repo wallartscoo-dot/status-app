@@ -21,6 +21,13 @@ import { spacing, radius, typography } from "@/theme/tokens";
 import { api, ApiError, type ApiPaginated, type ApiSound, type IslamicSubcategory } from "@/services/api";
 import { LIBRARY_TABS, ISLAMIC_SUBCATEGORIES, type LibraryTabKey } from "@/constants/sounds";
 
+type SoundstripePlaylist = {
+  id: string;
+  type: string;
+  attributes: Record<string, unknown>;
+  relationships?: Record<string, unknown>;
+};
+
 const PAGE_LIMIT = 20;
 
 export default function SoundLibrary() {
@@ -41,7 +48,10 @@ export default function SoundLibrary() {
   const [totalPages, setTotalPages] = useState(1);
 
   const requestId = useRef(0);
-
+const [soundstripePlaylists, setSoundstripePlaylists] = useState<SoundstripePlaylist[]>([]);
+const [soundstripeLoading, setSoundstripeLoading] = useState(false);
+const [soundstripeError, setSoundstripeError] = useState<string | null>(null);
+  
   // Debounce search input (300ms) before hitting the API.
   useEffect(() => {
     const t = setTimeout(() => setDebouncedQuery(query.trim()), 300);
@@ -50,6 +60,7 @@ export default function SoundLibrary() {
 
   const load = useCallback(
     async (targetPage: number, replace: boolean) => {
+      if (tab === "SOUNDSTRIPE") return;
       const myRequest = ++requestId.current;
       if (replace) {
         setLoading(true);
@@ -104,6 +115,43 @@ export default function SoundLibrary() {
     load(1, true);
   }, [load]);
 
+  useEffect(() => {
+  if (tab !== "SOUNDSTRIPE") return;
+
+  let cancelled = false;
+
+  const fetchPlaylists = async () => {
+    setSoundstripeLoading(true);
+    setSoundstripeError(null);
+
+    try {
+      const response = await api.soundstripePlaylists(1, 20);
+
+      if (!cancelled) {
+        setSoundstripePlaylists(response.data);
+      }
+    } catch (error) {
+      if (!cancelled) {
+        setSoundstripeError(
+          error instanceof Error
+            ? error.message
+            : "Couldn't load Soundstripe playlists."
+        );
+      }
+    } finally {
+      if (!cancelled) {
+        setSoundstripeLoading(false);
+      }
+    }
+  };
+
+  fetchPlaylists();
+
+  return () => {
+    cancelled = true;
+  };
+}, [tab]);
+  
   // Trending rail shown above the list on the "All" tab.
   useEffect(() => {
     if (tab !== "ALL" || debouncedQuery) return;
@@ -184,12 +232,67 @@ export default function SoundLibrary() {
         </ScrollView>
       )}
 
-      {loading ? (
-        <View style={{ paddingHorizontal: spacing.lg, paddingTop: spacing.md }}>
-          <SoundSkeletonList count={6} />
-        </View>
-      ) : (
-        <FlatList
+     {tab === "SOUNDSTRIPE" ? (
+  soundstripeLoading ? (
+    <View style={{ paddingHorizontal: spacing.lg, paddingTop: spacing.md }}>
+      <SoundSkeletonList count={6} />
+    </View>
+  ) : soundstripeError ? (
+    <SoundEmptyState
+      icon="alert-circle-outline"
+      title="Couldn't load Soundstripe"
+      subtitle={soundstripeError}
+    />
+  ) : (
+    <FlatList
+      data={soundstripePlaylists}
+      keyExtractor={(item) => item.id}
+      contentContainerStyle={{
+        paddingHorizontal: spacing.lg,
+        paddingTop: spacing.md,
+        paddingBottom: spacing.xxxl,
+        gap: spacing.sm,
+      }}
+      ListEmptyComponent={
+        <SoundEmptyState
+          icon="musical-notes-outline"
+          title="No playlists found"
+          subtitle="Soundstripe playlists will appear here when available."
+        />
+      }
+      renderItem={({ item }) => (
+        <Pressable
+          style={{
+            padding: spacing.lg,
+            borderRadius: radius.lg,
+            backgroundColor: theme.surfaceAlt,
+            borderWidth: 1,
+            borderColor: theme.border,
+          }}
+          onPress={() => {
+            console.log("Selected Soundstripe playlist:", item.id);
+          }}
+        >
+          <Text style={{ color: theme.textPrimary, fontSize: 16, fontWeight: "700" }}>
+            {String(
+              item.attributes["name"] ??
+              item.attributes["title"] ??
+              "Untitled Playlist"
+            )}
+          </Text>
+          <Text style={{ color: theme.textMuted, marginTop: spacing.xs }}>
+            Tap to explore playlist
+          </Text>
+        </Pressable>
+      )}
+    />
+  )
+) : loading ? (
+  <View style={{ paddingHorizontal: spacing.lg, paddingTop: spacing.md }}>
+    <SoundSkeletonList count={6} />
+  </View>
+) : (
+  <FlatList
           data={items}
           keyExtractor={(item) => item.id}
           contentContainerStyle={{ paddingHorizontal: spacing.lg, paddingTop: spacing.md, paddingBottom: spacing.xxxl, gap: spacing.sm }}
