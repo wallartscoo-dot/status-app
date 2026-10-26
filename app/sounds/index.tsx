@@ -48,6 +48,29 @@ type SoundstripeResource = {
 
 const PAGE_LIMIT = 20;
 
+type SoundstripeSongRowProps = {
+  title: string;
+  artist?: string;
+  audioUrl?: string;
+  theme: ReturnType<typeof useAppTheme>["theme"];
+};
+
+function SoundstripeSongRow({ title, artist, audioUrl, theme }: SoundstripeSongRowProps) {
+  const { isPlaying, toggle } = useAudioPreview(audioUrl);
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center", padding: spacing.lg, borderRadius: radius.lg, backgroundColor: theme.surfaceAlt, borderWidth: 1, borderColor: theme.border, gap: spacing.md }}>
+      <View style={{ flex: 1 }}>
+        <Text style={{ color: theme.textPrimary, fontSize: 15, fontWeight: "700" }}>{title}</Text>
+        {!!artist && <Text style={{ color: theme.textMuted, marginTop: spacing.xs }}>{artist}</Text>}
+        {!audioUrl && <Text style={{ color: theme.textMuted, fontSize: 12, marginTop: spacing.xs }}>Preview audio unavailable</Text>}
+      </View>
+      <Pressable accessibilityRole="button" accessibilityLabel={isPlaying ? `Pause ${title}` : `Play ${title}`} disabled={!audioUrl} onPress={() => void toggle()} style={{ width: 44, height: 44, borderRadius: 22, alignItems: "center", justifyContent: "center", backgroundColor: audioUrl ? theme.accent : theme.border, opacity: audioUrl ? 1 : 0.5 }}>
+        <Ionicons name={isPlaying ? "pause" : "play"} size={21} color={theme.onAccent} />
+      </Pressable>
+    </View>
+  );
+}
+
 export default function SoundLibrary() {
   const { theme } = useAppTheme();
   const { user } = useAuth();
@@ -190,18 +213,6 @@ export default function SoundLibrary() {
         if (!cancelled) {
           setSoundstripePlaylists(response.data ?? []);
           setSoundstripeIncluded(response.included ?? []);
-
-          console.log(
-            "Soundstripe audio fields:",
-            (response.included ?? [])
-              .filter((item) => item.type === "audio_files")
-              .slice(0, 2)
-              .map((item) => ({
-                id: item.id,
-                attributes: Object.keys(item.attributes),
-              }))
-          );
-
           setSelectedPlaylist(null);
 
           console.log("PLAYLIST COUNT:", response.data?.length);
@@ -219,13 +230,17 @@ export default function SoundLibrary() {
             "SONG DATA:",
             JSON.stringify(
               (response.included ?? [])
-                .filter((item) => item.type.toLowerCase().includes("song"))
+                .filter((item) =>
+                  item.type.toLowerCase().includes("song")
+                )
                 .slice(0, 2)
                 .map((item) => ({
                   id: item.id,
                   type: item.type,
                   attributes: item.attributes,
-                  relationshipKeys: Object.keys(item.relationships ?? {}),
+                  relationshipKeys: Object.keys(
+                    item.relationships ?? {}
+                  ),
                 })),
               null,
               2
@@ -322,32 +337,33 @@ export default function SoundLibrary() {
         "Untitled Song"
     );
 
-  const getResourceAudioUrl = (resource: SoundstripeResource) => {
-    const audioRelationship = resource.relationships?.["audio_files"] as
-      | { data?: Array<{ id: string }> }
-      | undefined;
 
-    const audioFile = soundstripeIncluded.find(
-      (item) =>
-        item.type === "audio_files" &&
-        audioRelationship?.data?.some((audio) => audio.id === item.id)
-    );
+  const getResourceAudioUrl = (resource: SoundstripeResource): string | undefined => {
+    const relationship = resource.relationships?.["audio_files"] as { data?: Array<{ id: string }> } | undefined;
+    const audioFile = soundstripeIncluded.find((entry) => entry.type === "audio_files" && relationship?.data?.some((audio) => audio.id === entry.id));
+    if (!audioFile) return undefined;
 
-    const attributes = audioFile?.attributes;
-
-    if (!attributes) return undefined;
-
-    for (const value of Object.values(attributes)) {
-      if (
-        typeof value === "string" &&
-        (value.startsWith("https://") || value.startsWith("http://")) &&
-        /\.(mp3|m4a|wav)(\?|$)/i.test(value)
-      ) {
-        return value;
+    const attributes = audioFile.attributes;
+    const versions = attributes["versions"];
+    const candidates: unknown[] = [
+      versions && typeof versions === "object" ? (versions as Record<string, unknown>)["mp3"] : undefined,
+      attributes["mp3"], attributes["preview_url"], attributes["audio_url"], attributes["url"], attributes["download_url"], attributes["stream_url"],
+    ];
+    const findUrl = (value: unknown, depth = 0): string | undefined => {
+      if (depth > 5 || value == null) return undefined;
+      if (typeof value === "string") return /^https?:\/\//i.test(value) ? value : undefined;
+      if (Array.isArray(value)) {
+        for (const entry of value) { const found = findUrl(entry, depth + 1); if (found) return found; }
+      } else if (typeof value === "object") {
+        const record = value as Record<string, unknown>;
+        for (const key of ["url", "src", "href", "mp3", "preview_url", "audio_url"]) {
+          const found = findUrl(record[key], depth + 1); if (found) return found;
+        }
       }
-    }
-
-    return undefined;
+      return undefined;
+    };
+    for (const candidate of candidates) { const found = findUrl(candidate); if (found) return found; }
+    return findUrl(attributes);
   };
 
   return (
@@ -416,7 +432,8 @@ export default function SoundLibrary() {
               {
                 backgroundColor:
                   tab === t.key ? theme.accent : theme.surfaceAlt,
-                borderColor: tab === t.key ? theme.accent : theme.border,
+                borderColor:
+                  tab === t.key ? theme.accent : theme.border,
               },
             ]}
           >
@@ -534,39 +551,13 @@ export default function SoundLibrary() {
                 />
               }
               renderItem={({ item }) => (
-                <View
-                  style={{
-                    padding: spacing.lg,
-                    borderRadius: radius.lg,
-                    backgroundColor: theme.surfaceAlt,
-                    borderWidth: 1,
-                    borderColor: theme.border,
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: theme.textPrimary,
-                      fontSize: 15,
-                      fontWeight: "700",
-                    }}
-                  >
-                    {getResourceTitle(item)}
-                  </Text>
-
-                  <Text style={{ color: "red", fontSize: 12 }}>
-                    {getResourceAudioUrl(item) ?? "Audio URL not found"}
-                  </Text>
-
-                  {!!item.attributes["artist_name"] && (
-                    <Text
-                      style={{
-                        color: theme.textMuted,
-                        marginTop: spacing.xs,
-                      }}
-                    >
-                      {String(item.attributes["artist_name"])}
-                    </Text>
-                  )}
+                <SoundstripeSongRow
+                  title={getResourceTitle(item)}
+                  artist={String(item.attributes["artist_name"] ?? "")}
+                  audioUrl={getResourceAudioUrl(item)}
+                  theme={theme}
+                />
+              )}
                 </View>
               )}
             />
