@@ -189,6 +189,16 @@ export default function SoundLibrary() {
         if (!cancelled) {
           setSoundstripePlaylists(response.data ?? []);
           setSoundstripeIncluded(response.included ?? []);
+          console.log(
+  "Soundstripe audio fields:",
+  (response.included ?? [])
+    .filter((item) => item.type === "audio_files")
+    .slice(0, 2)
+    .map((item) => ({
+      id: item.id,
+      attributes: Object.keys(item.attributes),
+    }))
+);
           setSelectedPlaylist(null);
 
           console.log("PLAYLIST COUNT:", response.data?.length);
