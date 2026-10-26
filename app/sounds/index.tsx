@@ -558,8 +558,6 @@ export default function SoundLibrary() {
                   theme={theme}
                 />
               )}
-                </View>
-              )}
             />
           </View>
         ) : (
