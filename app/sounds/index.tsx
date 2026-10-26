@@ -12,6 +12,7 @@ import { router } from "expo-router";
 import { Ionicons } from "@expo/vector-icons";
 import { Screen } from "@/components/Screen";
 import { SoundCard } from "@/components/SoundCard";
+import { useAudioPreview } from "@/hooks/useAudioPreview";
 import { GlassSurface } from "@/components/Glass";
 import { SoundSkeletonList, SoundEmptyState } from "@/components/SoundSkeleton";
 import { MoodChip } from "@/components/MoodChip";
@@ -189,16 +190,18 @@ export default function SoundLibrary() {
         if (!cancelled) {
           setSoundstripePlaylists(response.data ?? []);
           setSoundstripeIncluded(response.included ?? []);
+
           console.log(
-  "Soundstripe audio fields:",
-  (response.included ?? [])
-    .filter((item) => item.type === "audio_files")
-    .slice(0, 2)
-    .map((item) => ({
-      id: item.id,
-      attributes: Object.keys(item.attributes),
-    }))
-);
+            "Soundstripe audio fields:",
+            (response.included ?? [])
+              .filter((item) => item.type === "audio_files")
+              .slice(0, 2)
+              .map((item) => ({
+                id: item.id,
+                attributes: Object.keys(item.attributes),
+              }))
+          );
+
           setSelectedPlaylist(null);
 
           console.log("PLAYLIST COUNT:", response.data?.length);
@@ -216,17 +219,13 @@ export default function SoundLibrary() {
             "SONG DATA:",
             JSON.stringify(
               (response.included ?? [])
-                .filter((item) =>
-                  item.type.toLowerCase().includes("song")
-                )
+                .filter((item) => item.type.toLowerCase().includes("song"))
                 .slice(0, 2)
                 .map((item) => ({
                   id: item.id,
                   type: item.type,
                   attributes: item.attributes,
-                  relationshipKeys: Object.keys(
-                    item.relationships ?? {}
-                  ),
+                  relationshipKeys: Object.keys(item.relationships ?? {}),
                 })),
               null,
               2
@@ -323,6 +322,34 @@ export default function SoundLibrary() {
         "Untitled Song"
     );
 
+  const getResourceAudioUrl = (resource: SoundstripeResource) => {
+    const audioRelationship = resource.relationships?.["audio_files"] as
+      | { data?: Array<{ id: string }> }
+      | undefined;
+
+    const audioFile = soundstripeIncluded.find(
+      (item) =>
+        item.type === "audio_files" &&
+        audioRelationship?.data?.some((audio) => audio.id === item.id)
+    );
+
+    const attributes = audioFile?.attributes;
+
+    if (!attributes) return undefined;
+
+    for (const value of Object.values(attributes)) {
+      if (
+        typeof value === "string" &&
+        (value.startsWith("https://") || value.startsWith("http://")) &&
+        /\.(mp3|m4a|wav)(\?|$)/i.test(value)
+      ) {
+        return value;
+      }
+    }
+
+    return undefined;
+  };
+
   return (
     <Screen edges={["top"]} padded={false}>
       <View style={styles.header}>
@@ -389,8 +416,7 @@ export default function SoundLibrary() {
               {
                 backgroundColor:
                   tab === t.key ? theme.accent : theme.surfaceAlt,
-                borderColor:
-                  tab === t.key ? theme.accent : theme.border,
+                borderColor: tab === t.key ? theme.accent : theme.border,
               },
             ]}
           >
@@ -525,6 +551,10 @@ export default function SoundLibrary() {
                     }}
                   >
                     {getResourceTitle(item)}
+                  </Text>
+
+                  <Text style={{ color: "red", fontSize: 12 }}>
+                    {getResourceAudioUrl(item) ?? "Audio URL not found"}
                   </Text>
 
                   {!!item.attributes["artist_name"] && (
